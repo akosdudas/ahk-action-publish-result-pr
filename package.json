@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Processes a text log file that is the result of a student work evaluation and publishes the result into a Pull Request",
-  "main": "lib/main.js",
+  "main": "dist/main.js",
   "scripts": {
     "build": "ncc build src/main.ts",
     "format": "prettier --write **/*.ts",
