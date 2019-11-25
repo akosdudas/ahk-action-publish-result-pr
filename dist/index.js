@@ -1500,7 +1500,7 @@ function run() {
                 str += isNaN(r.points) ? "N/A" : r.points.toString();
                 str += markdown_newline;
                 if (r.comments && r.comments.length > 0) {
-                    str += r.comments;
+                    str += "> " + r.comments;
                 }
                 str += markdown_newline + markdown_newline;
             }
