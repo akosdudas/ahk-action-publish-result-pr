@@ -40,14 +40,14 @@ async function run() {
   function formatMessage(neptun: string, taskResults: AhkTaskResult[]): string {
     var str = "";
     str += "**Neptun: " + neptun + "**";
-    str += "\\r\\n";
-    str += "\\r\\n";
+    str += "\n";
+    str += "\n";
     for (const r of taskResults) {
-      str += "**" + r.taskName + "**: " + r.result + "\\r\\n";
+      str += "**" + r.taskName + "**: " + r.result + "\n";
       if (r.comments && r.comments.length > 0) {
         str += r.comments;
       }
-      str += "\\r\\n";
+      str += "\n";
     }
     return str;
   }
@@ -85,7 +85,7 @@ async function run() {
             ++lineIdx;
             core.debug(`Multiline continuation: ${nextLine}`);
 
-            entry = entry + "\\r\\n" + nextLine.trimRight();
+            entry = entry + "\n" + nextLine.trimRight();
           }
         }
 

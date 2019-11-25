@@ -1491,14 +1491,14 @@ function run() {
         function formatMessage(neptun, taskResults) {
             var str = "";
             str += "**Neptun: " + neptun + "**";
-            str += "\\r\\n";
-            str += "\\r\\n";
+            str += "\n";
+            str += "\n";
             for (const r of taskResults) {
-                str += "**" + r.taskName + "**: " + r.result + "\\r\\n";
+                str += "**" + r.taskName + "**: " + r.result + "\n";
                 if (r.comments && r.comments.length > 0) {
                     str += r.comments;
                 }
-                str += "\\r\\n";
+                str += "\n";
             }
             return str;
         }
@@ -1527,7 +1527,7 @@ function run() {
                             const nextLine = lines[lineIdx];
                             ++lineIdx;
                             core.debug(`Multiline continuation: ${nextLine}`);
-                            entry = entry + "\\r\\n" + nextLine.trimRight();
+                            entry = entry + "\n" + nextLine.trimRight();
                         }
                     }
                     const items = entry.split("#").filter(x => x);
