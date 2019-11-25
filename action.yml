@@ -1,0 +1,13 @@
+name: "AHK evaluation result"
+description: "Processes a text log file that is the result of a student work evaluation and publishes the result into a Pull Request"
+inputs:
+  input-file:
+    description: "The path of the input file"
+    required: true
+    default: "result.txt"
+  github-token:
+    description: "The GITHUB_TOKEN secret"
+    required: true
+runs:
+  using: "node12"
+  main: "lib/main.js"

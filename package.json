@@ -1,0 +1,31 @@
+{
+  "name": "ahk-action-publish-result-pr",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Processes a text log file that is the result of a student work evaluation and publishes the result into a Pull Request",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "ncc build src/main.ts",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akosdudas/ahk-action-publish-result-pr.git"
+  },
+  "keywords": [
+    "actions"
+  ],
+  "author": "Akos Dudas",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/github": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.0.4",
+    "@zeit/ncc": "^0.20.5",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.2"
+  }
+}
