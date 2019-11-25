@@ -1463,6 +1463,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
+const fs = __importStar(__webpack_require__(747));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -1471,13 +1472,27 @@ function run() {
             if (!pr) {
                 throw new Error("This action must be triggered on a pull request. (Event payload missing `pull_request`)");
             }
+            if (!fs.existsSync("neptun.txt")) {
+                throw new Error("Hiba: neptun.txt nem talalhato. Error: neptun.txt does not exist");
+            }
+            const neptunLines = fs
+                .readFileSync("neptun.txt", "utf-8")
+                .split("\n")
+                .filter(Boolean);
+            if (neptunLines.length == 0) {
+                throw new Error("Hiba: neptun.txt ures. Error: neptun.txt is empty");
+            }
+            const neptun = neptunLines[0].trim();
+            if (neptun.length == 0) {
+                throw new Error("Hiba: neptun.txt ures. Error: neptun.txt is empty");
+            }
             const client = new github.GitHub(token);
             core.debug(`Pull request ID is #${pr.number}`);
             yield client.issues.createComment({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 issue_number: pr.number,
-                body: "Hello from GH action"
+                body: "Hello from GH action\r\n\r\nNepun: " + neptun
             });
         }
         catch (error) {
