@@ -1511,12 +1511,12 @@ function run() {
                 if (ex.length > 0) {
                     str += ex + ": ";
                 }
-                const tasksOfEx = groupByExercise[ex];
-                if (taskResults.filter(x => isNaN(x.points)).length > 0) {
+                const tasksOfExercise = groupByExercise[ex];
+                if (tasksOfExercise.filter(x => isNaN(x.points)).length > 0) {
                     str += "inconclusive";
                 }
                 else {
-                    const sum = tasksOfEx.reduce((a, b) => a + (b.points || 0), 0);
+                    const sum = tasksOfExercise.reduce((a, b) => a + (b.points || 0), 0);
                     str += sum.toString();
                 }
                 str += markdown_newline;
