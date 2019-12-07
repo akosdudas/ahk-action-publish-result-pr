@@ -112,6 +112,7 @@ async function run() {
 
     var lines = fs
       .readFileSync(file, "utf-8")
+      .replace(/^\uFEFF/, "") // strip BOM
       .split("\n")
       .filter(Boolean);
 
@@ -127,6 +128,7 @@ async function run() {
       core.debug(`Line from file: ${line}`);
 
       if (line.startsWith("###ahk#")) {
+        core.debug(`Line is intended for evaluation`);
         var entry = line.trimRight();
         while (entry.endsWith("\\")) {
           entry = entry.substring(0, entry.length - 1).trimRight();
