@@ -8,7 +8,11 @@ Processes a text log file that is the result of a student work evaluation and pu
 
 #### `input-file`
 
-**Required** The path of the file to process. Default `"result.txt"`.
+The path of the input file containing the evaluation result. When specified, the parsed results will be included in the result comment. Defaults to `"result.txt"`.
+
+#### `image-extension`
+
+The extension of image files (with leading dot). When specified, the images are include in the result comment. Defaults to _not specified_.
 
 #### `github-token`
 
@@ -33,6 +37,7 @@ jobs:
         uses: akosdudas/ahk-action-publish-result-pr@master
         with:
           input-file: "result.txt"
+          image-extension: ".png"
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 ```
 

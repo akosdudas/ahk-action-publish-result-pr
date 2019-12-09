@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import * as fs from "fs";
+import * as path from "path";
 
 // This is the entry point
 async function run() {
@@ -8,7 +9,11 @@ async function run() {
 
   try {
     const token = core.getInput("github-token", { required: true });
-    const input_file = core.getInput("input-file", { required: true });
+
+    const input_file = core.getInput("input-file", { required: false });
+    const image_extension = core.getInput("image-extension", {
+      required: false
+    });
 
     const { pull_request: pr } = github.context.payload;
     if (!pr) {
@@ -21,14 +26,15 @@ async function run() {
     core.info(`Pull request ID is #${pr.number}`);
 
     const neptun = getNeptunCode();
-    const taskResults = processResultFile(input_file);
+    const task_results = processResultFile(input_file);
+    const image_files = processImageFiles(image_extension);
 
     const client = new github.GitHub(token);
     await client.issues.createComment({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: pr.number,
-      body: formatMessage(neptun, taskResults)
+      body: formatMessage(neptun, image_files, task_results)
     });
   } catch (error) {
     core.setFailed(error.message);
@@ -41,38 +47,61 @@ async function run() {
     comments: string;
   }
 
-  function formatMessage(neptun: string, taskResults: AhkTaskResult[]): string {
+  function formatMessage(
+    neptun: string,
+    imageFiles: string[] | null,
+    taskResults: AhkTaskResult[] | null
+  ): string {
     var str = "";
-    str += "**Neptun**: " + neptun;
-    str += markdown_newline;
-    str += markdown_newline;
-    for (const r of taskResults) {
-      str += "**" + formatTaskName(r) + "**: ";
-      str += isNaN(r.points) ? "N/A" : r.points.toString();
-      str += markdown_newline;
-      if (r.comments && r.comments.length > 0) {
-        str += "> " + r.comments;
+
+    if (imageFiles) {
+      for (const r of imageFiles) {
+        str +=
+          "**" + path.basename(r) + "**" + markdown_newline + markdown_newline;
+        str += `![](https://raw.githubusercontent.com/${
+          github.context.repo.owner
+        }/${github.context.repo.repo}/${github.context.sha}/${path.basename(
+          r
+        )})`;
+        str += markdown_newline + markdown_newline;
       }
-      str += markdown_newline + markdown_newline;
     }
 
-    str += "**Osszesen / Total**:";
-    str += markdown_newline;
+    str += "**Neptun**: " + neptun;
 
-    const groupByExercise = groupBy(taskResults, obj => obj.exerciseName);
-    for (const ex in groupByExercise) {
-      if (ex.length > 0) {
-        str += ex + ": ";
+    if (taskResults) {
+      if (str.length > 0) {
+        str += markdown_newline + markdown_newline;
       }
 
-      const tasksOfExercise = groupByExercise[ex];
-      if (tasksOfExercise.filter(x => isNaN(x.points)).length > 0) {
-        str += "inconclusive";
-      } else {
-        const sum = tasksOfExercise.reduce((a, b) => a + (b.points || 0), 0);
-        str += sum.toString();
+      for (const r of taskResults) {
+        str += "**" + formatTaskName(r) + "**: ";
+        str += isNaN(r.points) ? "N/A" : r.points.toString();
+        str += markdown_newline;
+        if (r.comments && r.comments.length > 0) {
+          str += "> " + r.comments;
+        }
+        str += markdown_newline + markdown_newline;
       }
+
+      str += "**Osszesen / Total**:";
       str += markdown_newline;
+
+      const groupByExercise = groupBy(taskResults, obj => obj.exerciseName);
+      for (const ex in groupByExercise) {
+        if (ex.length > 0) {
+          str += ex + ": ";
+        }
+
+        const tasksOfExercise = groupByExercise[ex];
+        if (tasksOfExercise.filter(x => isNaN(x.points)).length > 0) {
+          str += "inconclusive";
+        } else {
+          const sum = tasksOfExercise.reduce((a, b) => a + (b.points || 0), 0);
+          str += sum.toString();
+        }
+        str += markdown_newline;
+      }
     }
 
     return str;
@@ -103,7 +132,23 @@ async function run() {
     }
   }
 
-  function processResultFile(file: string): AhkTaskResult[] {
+  function processImageFiles(file_extension: string): string[] | null {
+    if (!file_extension) return null;
+
+    var files = Array<string>();
+    fs.readdirSync(".").forEach(file => {
+      const extension = path.extname(file);
+      if (extension.toUpperCase() == file_extension.toUpperCase()) {
+        core.debug(`Found image file: ${file}`);
+        files.push(file);
+      }
+    });
+    return files;
+  }
+
+  function processResultFile(file: string): AhkTaskResult[] | null {
+    if (!file) return null;
+
     if (!fs.existsSync(file)) {
       throw new Error(
         "Hiba: eredmeny fajl nem talalhato. Error: result file not found."

@@ -1464,13 +1464,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 const fs = __importStar(__webpack_require__(747));
+const path = __importStar(__webpack_require__(622));
 // This is the entry point
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const markdown_newline = "\n";
         try {
             const token = core.getInput("github-token", { required: true });
-            const input_file = core.getInput("input-file", { required: true });
+            const input_file = core.getInput("input-file", { required: false });
+            const image_extension = core.getInput("image-extension", {
+                required: false
+            });
             const { pull_request: pr } = github.context.payload;
             if (!pr) {
                 throw new Error("This action must be triggered on a pull request.");
@@ -1478,48 +1482,60 @@ function run() {
             core.info(`Running in repo ${github.context.repo.owner}/${github.context.repo.repo}`);
             core.info(`Pull request ID is #${pr.number}`);
             const neptun = getNeptunCode();
-            const taskResults = processResultFile(input_file);
+            const task_results = processResultFile(input_file);
+            const image_files = processImageFiles(image_extension);
             const client = new github.GitHub(token);
             yield client.issues.createComment({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 issue_number: pr.number,
-                body: formatMessage(neptun, taskResults)
+                body: formatMessage(neptun, image_files, task_results)
             });
         }
         catch (error) {
             core.setFailed(error.message);
         }
-        function formatMessage(neptun, taskResults) {
+        function formatMessage(neptun, imageFiles, taskResults) {
             var str = "";
-            str += "**Neptun**: " + neptun;
-            str += markdown_newline;
-            str += markdown_newline;
-            for (const r of taskResults) {
-                str += "**" + formatTaskName(r) + "**: ";
-                str += isNaN(r.points) ? "N/A" : r.points.toString();
-                str += markdown_newline;
-                if (r.comments && r.comments.length > 0) {
-                    str += "> " + r.comments;
+            if (imageFiles) {
+                for (const r of imageFiles) {
+                    str +=
+                        "**" + path.basename(r) + "**" + markdown_newline + markdown_newline;
+                    str += `![](https://raw.githubusercontent.com/${github.context.repo.owner}/${github.context.repo.repo}/${github.context.sha}/${path.basename(r)})`;
+                    str += markdown_newline + markdown_newline;
                 }
-                str += markdown_newline + markdown_newline;
             }
-            str += "**Osszesen / Total**:";
-            str += markdown_newline;
-            const groupByExercise = groupBy(taskResults, obj => obj.exerciseName);
-            for (const ex in groupByExercise) {
-                if (ex.length > 0) {
-                    str += ex + ": ";
+            str += "**Neptun**: " + neptun;
+            if (taskResults) {
+                if (str.length > 0) {
+                    str += markdown_newline + markdown_newline;
                 }
-                const tasksOfExercise = groupByExercise[ex];
-                if (tasksOfExercise.filter(x => isNaN(x.points)).length > 0) {
-                    str += "inconclusive";
+                for (const r of taskResults) {
+                    str += "**" + formatTaskName(r) + "**: ";
+                    str += isNaN(r.points) ? "N/A" : r.points.toString();
+                    str += markdown_newline;
+                    if (r.comments && r.comments.length > 0) {
+                        str += "> " + r.comments;
+                    }
+                    str += markdown_newline + markdown_newline;
                 }
-                else {
-                    const sum = tasksOfExercise.reduce((a, b) => a + (b.points || 0), 0);
-                    str += sum.toString();
-                }
+                str += "**Osszesen / Total**:";
                 str += markdown_newline;
+                const groupByExercise = groupBy(taskResults, obj => obj.exerciseName);
+                for (const ex in groupByExercise) {
+                    if (ex.length > 0) {
+                        str += ex + ": ";
+                    }
+                    const tasksOfExercise = groupByExercise[ex];
+                    if (tasksOfExercise.filter(x => isNaN(x.points)).length > 0) {
+                        str += "inconclusive";
+                    }
+                    else {
+                        const sum = tasksOfExercise.reduce((a, b) => a + (b.points || 0), 0);
+                        str += sum.toString();
+                    }
+                    str += markdown_newline;
+                }
             }
             return str;
         }
@@ -1543,7 +1559,22 @@ function run() {
                 return taskName;
             }
         }
+        function processImageFiles(file_extension) {
+            if (!file_extension)
+                return null;
+            var files = Array();
+            fs.readdirSync(".").forEach(file => {
+                const extension = path.extname(file);
+                if (extension.toUpperCase() == file_extension.toUpperCase()) {
+                    core.debug(`Found image file: ${file}`);
+                    files.push(file);
+                }
+            });
+            return files;
+        }
         function processResultFile(file) {
+            if (!file)
+                return null;
             if (!fs.existsSync(file)) {
                 throw new Error("Hiba: eredmeny fajl nem talalhato. Error: result file not found.");
             }
