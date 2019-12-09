@@ -1,6 +1,6 @@
 # AHK result process action
 
-Processes a text log file that is the result of a student work evaluation and publishes the result into a Pull Request.
+Gathers summary of a student submission into a PR comment.
 
 ## Usage
 
