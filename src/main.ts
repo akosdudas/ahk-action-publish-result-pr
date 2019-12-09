@@ -58,11 +58,9 @@ async function run() {
       for (const r of imageFiles) {
         str +=
           "**" + path.basename(r) + "**" + markdown_newline + markdown_newline;
-        str += `![](https://raw.githubusercontent.com/${
-          github.context.repo.owner
-        }/${github.context.repo.repo}/${github.context.sha}/${path.basename(
-          r
-        )})`;
+        str += `![](https://github.com/${github.context.repo.owner}/${
+          github.context.repo.repo
+        }/blob/${github.context.sha}/${path.basename(r)}?raw=true)`;
         str += markdown_newline + markdown_newline;
       }
     }
