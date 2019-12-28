@@ -1491,6 +1491,17 @@ function run() {
                 issue_number: pr.number,
                 body: formatMessage(neptun, image_files, task_results)
             });
+            try {
+                yield client.issues.removeLabel({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: pr.number,
+                    name: "eval"
+                });
+            }
+            catch (_a) {
+                // ignore label not found
+            }
         }
         catch (error) {
             core.setFailed(error.message);

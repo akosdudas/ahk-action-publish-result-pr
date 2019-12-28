@@ -30,12 +30,24 @@ async function run() {
     const image_files = processImageFiles(image_extension);
 
     const client = new github.GitHub(token);
+
     await client.issues.createComment({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: pr.number,
       body: formatMessage(neptun, image_files, task_results)
     });
+
+    try {
+      await client.issues.removeLabel({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: pr.number,
+        name: "eval"
+      });
+    } catch {
+      // ignore label not found
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
