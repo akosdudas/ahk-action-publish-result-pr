@@ -25,16 +25,16 @@ on: [pull_request]
 
 jobs:
   job1:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
           fetch-depth: 1
       - name: Evaluate
         run: do-eval.sh
       - name: Publish results
-        uses: akosdudas/ahk-action-publish-result-pr@master
+        uses: akosdudas/ahk-action-publish-result-pr@v1
         with:
           input-file: "result.txt"
           image-extension: ".png"
