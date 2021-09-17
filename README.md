@@ -4,6 +4,8 @@ Posts the results of an automated evaluation of a student homework as a comment 
 
 See <https://github.com/akosdudas/ahk-sample-studentsolution/pull/1> for an example. Please refer to <https://akosdudas.github.io/automated-homework-evaluation/> for the "big picture."
 
+:exclamation: This action is a JavaScript action for GitHub Actions. A more complete version with similar functionality is available as a [container](https://github.com/users/akosdudas/packages/container/package/ahk-publish-results-pr) written in Go at <https://github.com/akosdudas/ahk-github-automation>
+
 ## Usage of the action
 
 The action must execute within the scope of a pull request.
